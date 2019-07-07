@@ -19,6 +19,7 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.apache.poi.xwpf.extractor.XWPFWordExtractor;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
 import org.apache.xmlbeans.XmlException;
+import top.dadagum.extractor.domain.FileSuffixType;
 
 import java.io.*;
 import java.nio.charset.Charset;
@@ -35,6 +36,53 @@ public class FileUtil {
      * 默认检测 txt 的字符集
      */
     private static String[] charsetsToBeTested = {"Unicode", "UTF-8", "UTF-16"};
+
+    /**
+     * 根据文件后缀名提取文本内容， 目前内容只支持 pdf, doc, docx, ppt, pptx, xls, xlsx 的提取
+     * 如果是其它文件的类型，返回 String = null
+     * @param path 文件路径
+     * @return
+     */
+    public static String extractString(String path) throws IOException, OpenXML4JException, XmlException {
+        String res = null;
+        String suffix = getFileSuffix(path).toLowerCase();
+        switch (suffix) {
+            case "pdf":
+                res = pdf2String(new File(path));
+                break;
+            case "doc":
+                res = doc2String(new File(path));
+                break;
+            case "docx":
+                res = docx2String(new File(path));
+                break;
+            case "ppt":
+                res = ppt2String(new File(path));
+                break;
+            case "pptx":
+                res = pptx2String(path);
+                break;
+            case "xls":
+                res = xls2String(path);
+                break;
+            case "xlsx":
+                res = xlsx2String(path);
+                break;
+            case "txt":
+                res = txt2String(new File(path));
+                break;
+        }
+        return res;
+    }
+
+    /**
+     * 得到文件后缀
+     * @param fileName 文件名
+     * @return
+     */
+    public static String getFileSuffix(String fileName) {
+        return fileName.substring(fileName.lastIndexOf('.')+1);
+    }
 
     public static String pdf2String(File file) throws IOException {
         PDDocument document = null;

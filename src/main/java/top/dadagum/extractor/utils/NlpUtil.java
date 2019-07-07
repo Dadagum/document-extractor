@@ -1,9 +1,13 @@
 package top.dadagum.extractor.utils;
 
 import com.hankcs.hanlp.HanLP;
+import com.hankcs.hanlp.corpus.document.sentence.Sentence;
+import com.hankcs.hanlp.model.crf.CRFLexicalAnalyzer;
 import com.hankcs.hanlp.seg.Segment;
 import com.hankcs.hanlp.seg.common.Term;
+import com.hankcs.hanlp.tokenizer.NLPTokenizer;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -20,11 +24,11 @@ public class NlpUtil {
      * @param text
      * @return
      */
-    public static List<String> createShortWord(String text) {
-        return createShortWord(text, 15);
+    public static List<String> findKeyword(String text) {
+        return findKeyword(text, 15);
     }
 
-    public static List<String> createShortWord(String text, int cnt) {
+    public static List<String> findKeyword(String text, int cnt) {
         return HanLP.extractKeyword(text, cnt);
     }
 
@@ -35,12 +39,13 @@ public class NlpUtil {
      * @return
      */
     public static List<Term> NER(String text) {
-        Segment segment = HanLP.newSegment()
-                .enableOrganizationRecognize(true)
-                .enablePlaceRecognize(true)
-                .enableNameRecognize(true)
-                .enableTranslatedNameRecognize(true);
-        return segment.seg(text);
+//        Segment segment = HanLP.newSegment()
+//                .enableOrganizationRecognize(true)
+//                .enablePlaceRecognize(true)
+//                .enableNameRecognize(true)
+//                .enableTranslatedNameRecognize(true);
+//        return segment.seg(text);
+        return NLPTokenizer.segment(text);
     }
 
     /**
@@ -48,8 +53,8 @@ public class NlpUtil {
      * @param words
      * @return
      */
-    public static List<Term> NER(String[] words) {
-        List<Term> res = new ArrayList<>(words.length);
+    public static List<Term> NER(List<String> words) {
+        List<Term> res = new ArrayList<>(words.size());
         for (String w : words) {
             res.addAll(NER(w));
         }
@@ -61,7 +66,7 @@ public class NlpUtil {
      * @param set 指定留下的 Nature 列表
      * @return
      */
-    public static List<Term> keepNatures(Set<String> set, List<Term> terms) {
+    public static List<Term> keepNatures(List<Term> terms, Set<String> set) {
         List<Term> res = new ArrayList<>();
         for (Term t : terms) {
             if (set.contains(t.nature.toString())) {
@@ -69,5 +74,26 @@ public class NlpUtil {
             }
         }
         return res;
+    }
+
+    /**
+     * 对于词语列表，去掉某些特定词性的词语（例如动词）
+     * @param set 指定去掉的 Nature 列表
+     * @return
+     */
+    public static List<Term> removeNatures(List<Term> terms, Set<String> set) {
+        List<Term> res = new ArrayList<>();
+        for (Term t : terms) {
+            if (!set.contains(t.nature.toString())) {
+                res.add(t);
+            }
+        }
+        return res;
+    }
+
+    public static void CRF(String text) throws IOException {
+        CRFLexicalAnalyzer analyzer = new CRFLexicalAnalyzer();
+        Sentence analyze = analyzer.analyze(text);
+        System.out.println(analyze.wordList);
     }
 }
