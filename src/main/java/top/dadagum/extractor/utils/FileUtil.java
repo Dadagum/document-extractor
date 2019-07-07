@@ -1,4 +1,4 @@
-package top.dadagum.extractor;
+package top.dadagum.extractor.utils;
 
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.text.PDFTextStripper;
@@ -25,11 +25,11 @@ import java.nio.charset.Charset;
 import java.text.NumberFormat;
 
 /**
- * @Description 提取文件各种内容的工具类
+ * @Description 文件工具类
  * @Author Honda
  * @Date 2019/6/19 22:58
  **/
-public class FileExtractor {
+public class FileUtil {
 
     /**
      * 默认检测 txt 的字符集
