@@ -4,14 +4,12 @@ import com.hankcs.hanlp.corpus.tag.Nature;
 import com.hankcs.hanlp.seg.common.Term;
 import org.apache.poi.openxml4j.exceptions.OpenXML4JException;
 import org.apache.xmlbeans.XmlException;
-import top.dadagum.extractor.utils.FileUtil;
+import top.dadagum.extractor.utils.FileExtractUtil;
 import top.dadagum.extractor.utils.NlpUtil;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * @Description TODO
@@ -29,7 +27,8 @@ public class FileExtractService {
 
     static {
         // 保留
-      //  natures.add(Nature.nr.toString()); // 人名
+      //  keep.add(Nature.nr.toString()); // 人名
+        keep.add(Nature.n.toString());
         keep.add(Nature.nrf.toString());
         keep.add(Nature.ns.toString()); // 地名
         keep.add(Nature.nsf.toString());
@@ -50,28 +49,29 @@ public class FileExtractService {
     }
 
     /**
-     * 将一个文件（pdf, doc, ...）找出其中的关键字等便于进行内容的检索
-     * @param path 文件存储位置
+     * 提取关键字，只是简单取词频前 k
+     * @param text 文本信息
+     * @param k 取词数量
+     * @return 关键词
+     * @throws IOException
+     * @throws OpenXML4JException
+     * @throws XmlException
      */
-    public List<Term> createFileIndex(String path) throws IOException, OpenXML4JException, XmlException {
-        List<Term> res = new ArrayList<>();
-        // 转化为文本信息
-        String str = FileUtil.extractString(path);
-        // 去掉空白
-        str = FileUtil.removeSpace(str);
-        if (str != null) {
-            // 提取关键字
-            //List<String> keyword = NlpUtil.findKeyword(str);
-            // 识别关键字并去掉一些词汇
-            //res = NlpUtil.NER(keyword);
-           // res = NlpUtil.removeNatures(res, garbage);
-            // NER
-            res = NlpUtil.NER(str);
-            // 选取一些特定的词（人名 / 地点 / 机构 ...）
-            res = NlpUtil.keepNatures(res, keep);
-            // 融合
-            // res.addAll(ner);
+    public List<String> findKeyword(String text, int k) throws IOException, OpenXML4JException, XmlException {
+        Map<String, Integer> map = new HashMap<>();
+        List<Term> ner = NlpUtil.NER(text);
+        for (Term term : ner) {
+            if (FileExtractService.keep.contains(term.nature.toString())) {
+                Integer value = Optional.ofNullable(map.get(term.word))
+                        .map(x -> x+1).orElse(1);
+                map.put(term.word, value);
+            }
         }
-        return res;
+        // 找出出现频率最大的 10 个词汇
+        //  System.out.println(map);
+        List<String> collect = map.entrySet().stream().sorted((x1, x2) -> x2.getValue() - x1.getValue()).limit(k).map(e -> e.getKey()).collect(Collectors.toList());
+        return collect;
     }
+
+
 }

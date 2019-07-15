@@ -20,10 +20,9 @@ import org.apache.xmlbeans.XmlException;
 import org.junit.Assert;
 import org.junit.Test;
 import top.dadagum.extractor.service.FileExtractService;
-import top.dadagum.extractor.utils.FileUtil;
+import top.dadagum.extractor.utils.FileExtractUtil;
 import top.dadagum.extractor.utils.NlpUtil;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
@@ -268,42 +267,17 @@ public class HanlpTest {
         System.out.println(list1);
     }
 
-    @Test
-    public void convert() throws IOException, OpenXML4JException, XmlException {
-        // pdf / doc 文件转换为字符串
-        String path = "D:\\文档\\学习资料\\作业\\信息安全\\实验一 DES加解密算法编程实现\\实验一 DES加解密算法编程实现.doc";
-        FileExtractService service = new FileExtractService();
-        List<Term> fileIndex = service.createFileIndex(path);
-        for (Term t : fileIndex) {
-            String word = t.word;
-            System.out.println(word.length());
-        }
-        System.out.println((int) fileIndex.get(5).word.charAt(0));
-        System.out.println(fileIndex);
-    }
-
     /**
      * 统计词频
      */
     @Test
     public void cntWord() throws OpenXML4JException, XmlException, IOException {
-        Map<String, Integer> map = new HashMap<>();
         String path = "D:\\文档\\学习资料\\作业\\信息安全\\实验一 DES加解密算法编程实现\\实验一 DES加解密算法编程实现.doc";
-        String text = FileUtil.extractString(path);
-        text = FileUtil.removeSpace(text);
+        String text = FileExtractUtil.extractString(path);
         Assert.assertNotNull(text);
-        List<Term> ner = NlpUtil.NER(text);
-        for (Term term : ner) {
-            if (FileExtractService.keep.contains(term.nature.toString()) || term.nature.toString().equals("n")) {
-                Integer value = Optional.ofNullable(map.get(term.word))
-                        .map(x -> x+1).orElse(1);
-                map.put(term.word, value);
-            }
-        }
-        // 找出出现频率最大的 10 个词汇
-      //  System.out.println(map);
-        List<String> collect = map.entrySet().stream().sorted((x1, x2) -> x2.getValue() - x1.getValue()).limit(10).map(e -> e.getKey()).collect(Collectors.toList());
-        System.out.println(collect);
+        FileExtractService service = new FileExtractService();
+        List<String> keyword = service.findKeyword(text, 10);
+        System.out.println(keyword);
     }
 
 }

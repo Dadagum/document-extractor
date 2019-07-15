@@ -2,7 +2,8 @@ package top.dadagum.extractor;
 
 import org.apache.poi.openxml4j.exceptions.OpenXML4JException;
 import org.apache.xmlbeans.XmlException;
-import top.dadagum.extractor.utils.FileUtil;
+import org.junit.Test;
+import top.dadagum.extractor.utils.FileExtractUtil;
 
 import java.io.File;
 import java.io.IOException;
@@ -14,59 +15,70 @@ import java.io.IOException;
  **/
 public class FileTest {
 
-    public static void doc() throws IOException {
+    @Test
+    public void doc() throws IOException, OpenXML4JException, XmlException {
         String docPath = "D:\\testing\\extract.doc";
-        String str = FileUtil.doc2String(new File(docPath));
+        String str = FileExtractUtil.extractString(docPath);
         System.out.println(str);
     }
 
-    public static void pdf() throws IOException {
+    @Test
+    public void pdf() throws IOException, OpenXML4JException, XmlException {
         String path = "D:\\testing\\梁宏达-实训点1-库表设计与高效存储v1.1.pdf";
-        String str = FileUtil.pdf2String(new File(path));
+        String str = FileExtractUtil.extractString(path);
         System.out.println(str);
     }
 
-    public static void docx() throws IOException {
+    @Test
+    public void docx() throws IOException, OpenXML4JException, XmlException {
         String docPath = "D:\\testing\\extract.docx";
-        String str = FileUtil.docx2String(new File(docPath));
+        String str = FileExtractUtil.extractString(docPath);
         System.out.println(str);
     }
 
-    public static void ppt() throws IOException {
+    @Test
+    public void ppt() throws IOException, OpenXML4JException, XmlException {
         String docPath = "D:\\testing\\2018-3-4梁宏达进度汇报.ppt";
-        String str = FileUtil.ppt2String(new File(docPath));
+        String str = FileExtractUtil.extractString(docPath);
         System.out.println(str);
     }
 
-    public static void pptx() throws OpenXML4JException, XmlException, IOException {
+    @Test
+    public void pptx() throws OpenXML4JException, XmlException, IOException {
         String docPath = "D:\\testing\\2018-3-4梁宏达进度汇报.pptx";
-        String str = FileUtil.pptx2String(docPath);
+        String str = FileExtractUtil.extractString(docPath);
         System.out.println(str);
     }
 
-    public static void xlsx() throws IOException {
+    @Test
+    public void xlsx() throws IOException, OpenXML4JException, XmlException {
         String path = "D:\\testing\\data.xlsx";
-        String str = FileUtil.xlsx2String(path);
+        String str = FileExtractUtil.extractString(path);
         System.out.println(str);
     }
 
-    public static void xls() throws IOException {
+    @Test
+    public void xls() throws IOException, OpenXML4JException, XmlException {
         String path = "D:\\testing\\data.xls";
-        String str = FileUtil.xls2String(path);
+        String str = FileExtractUtil.extractString(path);
         System.out.println(str);
     }
 
     public static void txtUnicode() throws IOException {
         String path = "D:\\testing\\data_unicode.txt";
-        String str = FileUtil.txt2String(new File(path));
+        String str = FileExtractUtil.txt2String(new File(path));
         System.out.println(str);
     }
 
 
 
+
+
+
+
 //    public static void txtUtf8() throws IOException {
 //        String path = "D:\\testing\\data_utf8.txt";
-//        String str = FileUtil.txt2String(new File(path));
+//        String str = FileExtractUtil.txt2String(new File(path));
 //        System.out.println(str);
 //    }
 }

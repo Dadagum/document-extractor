@@ -30,7 +30,7 @@ import java.text.NumberFormat;
  * @Author Honda
  * @Date 2019/6/19 22:58
  **/
-public class FileUtil {
+public class FileExtractUtil {
 
     public static String removeSpace(String str) {
         StringBuilder sb = new StringBuilder();
@@ -82,7 +82,7 @@ public class FileUtil {
                 res = txt2String(new File(path));
                 break;
         }
-        return res;
+        return res == null ? res : removeSpace(res);
     }
 
     /**
