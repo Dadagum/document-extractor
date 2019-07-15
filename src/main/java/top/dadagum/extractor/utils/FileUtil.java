@@ -32,6 +32,16 @@ import java.text.NumberFormat;
  **/
 public class FileUtil {
 
+    public static String removeSpace(String str) {
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < str.length(); i++) {
+            if (str.charAt(i) != ' ' && str.charAt(i) != '\n' && str.charAt(i) != '\t' && str.charAt(i) != '\r') {
+                sb.append(str.charAt(i));
+            }
+        }
+        return sb.toString();
+    }
+
     /**
      * 默认检测 txt 的字符集
      */

@@ -62,6 +62,8 @@ public class FileTest {
         System.out.println(str);
     }
 
+
+
 //    public static void txtUtf8() throws IOException {
 //        String path = "D:\\testing\\data_utf8.txt";
 //        String str = FileUtil.txt2String(new File(path));

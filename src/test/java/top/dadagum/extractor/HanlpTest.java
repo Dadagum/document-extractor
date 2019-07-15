@@ -2,6 +2,8 @@ package top.dadagum.extractor;
 
 import com.hankcs.hanlp.HanLP;
 import com.hankcs.hanlp.collection.AhoCorasick.AhoCorasickDoubleArrayTrie;
+import com.hankcs.hanlp.corpus.document.sentence.Sentence;
+import com.hankcs.hanlp.corpus.document.sentence.word.IWord;
 import com.hankcs.hanlp.dictionary.CoreDictionary;
 import com.hankcs.hanlp.dictionary.CustomDictionary;
 import com.hankcs.hanlp.model.crf.CRFLexicalAnalyzer;
@@ -13,13 +15,21 @@ import com.hankcs.hanlp.tokenizer.IndexTokenizer;
 import com.hankcs.hanlp.tokenizer.NLPTokenizer;
 import com.hankcs.hanlp.tokenizer.SpeedTokenizer;
 import com.hankcs.hanlp.tokenizer.StandardTokenizer;
+import org.apache.poi.openxml4j.exceptions.OpenXML4JException;
+import org.apache.xmlbeans.XmlException;
+import org.junit.Assert;
 import org.junit.Test;
+import top.dadagum.extractor.service.FileExtractService;
 import top.dadagum.extractor.utils.FileUtil;
 import top.dadagum.extractor.utils.NlpUtil;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 /**
  * @Description TODO
@@ -74,13 +84,16 @@ public class HanlpTest {
     public void CRF() throws IOException {
         CRFLexicalAnalyzer analyzer = new CRFLexicalAnalyzer();
         String[] tests = new String[]{
-                "商品和服务",
                 "上海华安工业（集团）公司董事长谭旭光和秘书胡花蕊来到美国纽约现代艺术博物馆参观",
-                "微软公司於1975年由比爾·蓋茲和保羅·艾倫創立，18年啟動以智慧雲端、前端為導向的大改組。" // 支持繁体中文
         };
         for (String sentence : tests)
         {
-            System.out.println(analyzer.analyze(sentence));
+            Sentence analyze = analyzer.analyze(sentence);
+            List<IWord> wordList = analyze.wordList;
+            System.out.println(wordList.size());
+            for (IWord w : wordList) {
+                System.out.println(w);
+            }
         }
     }
 
@@ -178,6 +191,7 @@ public class HanlpTest {
                 "我在上海林原科技有限公司兼职工作，",
                 "我经常在台川喜宴餐厅吃饭，",
                 "偶尔去地中海影城看电影。",
+                "评估一项系统"
         };
         Segment segment = HanLP.newSegment().enableOrganizationRecognize(true);
         for (String sentence : testCase)
@@ -235,12 +249,14 @@ public class HanlpTest {
         // 分词
         String text = "清华大学北京协和医院市政府佛山市一医院蔡徐坤和史蒂芬库里在广州市莱斯利镇的腾讯公司中参加公益活动和进入中国农业银行，               然后参观富士康，发现没有钱，            于是到瑞士银行。随后，再到白天鹅酒店中休息          。晚上，           广州市政府叫华南理工大学的李一和华工一小的同学到阿里大药房买达克宁，因为李二静脉扩张。然后著名篮球运动员蔡徐坤发表言论，               想参观广州教育部";
        // String text = "你好我是蔡徐坤，喜欢唱跳rap篮球";
-        Segment segment = HanLP.newSegment()
-                .enableOrganizationRecognize(true)
-                .enablePlaceRecognize(true)
-                .enableNameRecognize(true)
-                .enableTranslatedNameRecognize(true);
-        List<Term> seg = segment.seg(text);
+//        Segment segment = HanLP.newSegment()
+//                .enableOrganizationRecognize(true)
+//                .enablePlaceRecognize(true)
+//                .enableNameRecognize(true)
+//                .enableTranslatedNameRecognize(true);
+
+        List<Term> seg = NLPTokenizer.segment(text);
+        //List<Term> seg = segment.seg(text);
         System.out.println(seg);
 
         // 短语提取
@@ -253,17 +269,41 @@ public class HanlpTest {
     }
 
     @Test
-    public void convert() throws IOException {
+    public void convert() throws IOException, OpenXML4JException, XmlException {
         // pdf / doc 文件转换为字符串
-        String path = "D:\\文档\\学习资料\\project\\陈老师项目\\梁宏达-实训点2-业务分析和响应时间测量v1.0.pdf";
-        String str = FileUtil.pdf2String(new File(path));
-        // 使用 nlp 工具类来提取关键字
-        // 提取短语
-        List<String> shortWord = NlpUtil.createShortWord(str);
-        System.out.println(shortWord);
+        String path = "D:\\文档\\学习资料\\作业\\信息安全\\实验一 DES加解密算法编程实现\\实验一 DES加解密算法编程实现.doc";
+        FileExtractService service = new FileExtractService();
+        List<Term> fileIndex = service.createFileIndex(path);
+        for (Term t : fileIndex) {
+            String word = t.word;
+            System.out.println(word.length());
+        }
+        System.out.println((int) fileIndex.get(5).word.charAt(0));
+        System.out.println(fileIndex);
+    }
 
-       // System.out.println(HanLP.extractSummary(str, 10));
-        // 提取人名（nr, nrf），地名(ns, nsf)，机构组织等（nz， nt, ntc， nto）
+    /**
+     * 统计词频
+     */
+    @Test
+    public void cntWord() throws OpenXML4JException, XmlException, IOException {
+        Map<String, Integer> map = new HashMap<>();
+        String path = "D:\\文档\\学习资料\\作业\\信息安全\\实验一 DES加解密算法编程实现\\实验一 DES加解密算法编程实现.doc";
+        String text = FileUtil.extractString(path);
+        text = FileUtil.removeSpace(text);
+        Assert.assertNotNull(text);
+        List<Term> ner = NlpUtil.NER(text);
+        for (Term term : ner) {
+            if (FileExtractService.keep.contains(term.nature.toString()) || term.nature.toString().equals("n")) {
+                Integer value = Optional.ofNullable(map.get(term.word))
+                        .map(x -> x+1).orElse(1);
+                map.put(term.word, value);
+            }
+        }
+        // 找出出现频率最大的 10 个词汇
+      //  System.out.println(map);
+        List<String> collect = map.entrySet().stream().sorted((x1, x2) -> x2.getValue() - x1.getValue()).limit(10).map(e -> e.getKey()).collect(Collectors.toList());
+        System.out.println(collect);
     }
 
 }

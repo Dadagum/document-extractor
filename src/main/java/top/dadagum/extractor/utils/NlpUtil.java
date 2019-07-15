@@ -25,7 +25,7 @@ public class NlpUtil {
      * @return
      */
     public static List<String> findKeyword(String text) {
-        return findKeyword(text, 15);
+        return findKeyword(text, 10);
     }
 
     public static List<String> findKeyword(String text, int cnt) {
